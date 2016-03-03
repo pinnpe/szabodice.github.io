@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>SzaboDice</title>
+    <meta name="description" content="">
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div id="page">
+        <div id="header">
+          <img src="title.svg" />
+        </div>
+        <div class="jumbo">
+          <h1>Smart contract gambling</h1>
+          <p>Pick an address with odds you like and send a wager</p>
+        </div>
+        <div class="rule"></div>
+        <div>
+          <div class="row">
+            <div class="col-md-6">
+              <h3>Smart contracts</h3>
+              <p>SzaboDice is a collection of smart contracts that exist in the <a href="http://www.ethereum.org" target="_blank">Ethereum</a> blockchain. Each smart contract operates a decentralized dice casino.</p>
+            </div>
+            <div class="col-md-6">
+              <h3>True randomness</h3>
+              <p>SzaboDice gets its randomness from <a href="https://www.random.org" target="_blank">Random.org</a>, which provides true randomness from atmospheric noise, via <a href="http://www.oraclize.it" target="_blank">Oraclize</a>.</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <h3>Play or invest</h3>
+              <p>Each SzaboDice contract is bankrolled by up to five investors. The highest bidders control the bankroll, and the losers surrender their shares.</p>
+            </div>
+            <div class="col-md-6">
+              <h3>Open source</h3>
+              <p>SzaboDice is open source on <a href="https://github.com/szabodice/szabodice" target="_blank">GitHub</a>. Find the <a href="https://github.com/szabodice/szabodice/blob/master/dice.sol" target="_blank">smart contract source code</a> and read it for yourself.</p>
+            </div>
+          </div>
+        </div>
+        <div class="rule"></div>
+        <div>
+          <h3>SzaboDice contracts</h3>
+          <div id="contracts">
+            <i class="fa fa-spinner fa-spin"></i>
+          </div>
+        </div>
+        <div>
+          <h3>How to play</h3>
+            <p>Just send Ether to one of the contract addresses listed above. If you win, you'll receive the payout. If you lose, we'll send you 1 Wei so you know you lost. The gas cost will be ~110,000 (0.005 eth). If you're using Geth, here's how to send the transaction:</p>
+            <pre>eth.sendTransaction({from: eth.accounts[0], to: '0xSZABODICE_ADDRESS_HERE', value: web3.toWei(1, "ether"), gas: 110000})</pre>
+          <h3>How to invest</h3>
+            <p>Head on over to the <a href="https://github.com/szabodice/szabodice" target="_blank">GitHub repository</a> to learn how to send investment funds to the smart contract.</p>
+        </div>
+        <div id="footer">
+          <span><i class="fa fa-th"></i> SzaboDice has no owner. It is a decentralized autonomous organization governed by the Ethereum blockchain.</span>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js" type="text/javascript"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="ejs_production.js" type="text/javascript"></script>
+    <script src="config.js" type="text/javascript"></script>
+    <script src="bundle.js" type="text/javascript"></script>
+</body>
+</html>
