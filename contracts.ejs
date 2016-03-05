@@ -13,7 +13,7 @@
           <p><strong>Payout</strong>: <%= (10000-contract.edge)/contract.pwin %>x (includes <%= contract.edge/100%>% house edge)</p>
           <p><strong>Bankroll</strong>: <%= bundle.utility.weiToEth(contract.bankroll) %> eth</p>
           <p><strong>Min bet</strong>: <%= bundle.utility.weiToEth(contract.minBet) %> eth</p>
-          <p><strong>Max bet</strong>: <%= bundle.utility.weiToEth(contract.maxWin * contract.bankroll / 10000 / ( 10000/contract.pwin - 1 )) %> eth (corresponds to <%= contract.maxWin/100 %>% of bankroll max win amount before house edge is taken)</p>
+          <p><strong>Max bet</strong>: <%= bundle.utility.weiToEth(contract.maxWin * contract.bankroll / 10000 / ( 10000/contract.pwin - 1 )) %> eth (corresponds to <%= contract.maxWin/100 %>% of bankroll max profit before house edge is taken)</p>
           <p><strong>Amount wagered</strong>: <%= bundle.utility.weiToEth(contract.amountWagered) %> eth</p>
           <p><strong>House profit</strong>: <%= bundle.utility.weiToEth(contract.profit) %> eth</p>
           <p><strong>Send a bet with Geth:</strong></p>
