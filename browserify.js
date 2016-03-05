@@ -21,6 +21,7 @@ Main.updateTable = function() {
       });
     },
     function(err, contracts) {
+      contracts.sort(function(a,b){return a.pwin>b.pwin});
       new EJS({url: config.home_url+'/'+'contracts.ejs'}).update('contracts', {contracts: contracts});
     }
   );
