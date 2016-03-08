@@ -68390,7 +68390,7 @@ module.exports = transfer;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],254:[function(_dereq_,module,exports){
 var Web3 = _dereq_('web3');
-var utility = _dereq_('./utility.js');
+var utility = _dereq_('./utility_basic.js');
 var request = _dereq_('request');
 var async = (typeof(window) === 'undefined') ? _dereq_('async') : _dereq_('async/dist/async.min.js');
 
@@ -68398,7 +68398,7 @@ function Main() {
 }
 //functions
 Main.updateTable = function() {
-  async.map(config.addrs,
+  async.map(config.contract_dice_addrs,
     function(addr, callback) {
       utility.proxyCall(web3, myContract, addr, 'getStatus', [], function(result) {
         var bankroll = result[0].toNumber();
@@ -68430,22 +68430,23 @@ $(function() {
     var code = compiled.Dice.code;
     var abi = compiled.Dice.info.abiDefinition;
     myContract = web3.eth.contract(abi);
-    myContract = myContract.at(config.addrs[0]);
+    myContract = myContract.at(config.contract_dice_addrs[0]);
     Main.refresh();
   });
 });
 
 module.exports = {Main: Main, utility: utility};
 
-},{"./utility.js":256,"async":2,"async/dist/async.min.js":1,"request":44,"web3":170}],255:[function(_dereq_,module,exports){
+},{"./utility_basic.js":256,"async":2,"async/dist/async.min.js":1,"request":44,"web3":170}],255:[function(_dereq_,module,exports){
 (function (global){
 var config = {};
 
 config.contract_dice = 'dice.sol';
-config.addrs = ["0x7353de0d4d9f86fb80a94a4f99f5e13c9c980a90"];
-// config.home_url = 'http://szabodice.github.io';
-config.home_url = 'http://localhost:8080';
+config.contract_dice_addrs = ['0xb10c013a492f0d771f743dddff1361129e18d737'];
+config.home_url = 'http://szabodice.github.io';
 config.eth_testnet = true;
+config.eth_addr = '0x0000000000000000000000000000000000000000';
+config.eth_addr_pk = '';
 
 try {
   global.config = config;

@@ -245,7 +245,6 @@ contract usingOraclize {
 
 contract Dice is usingOraclize {
 
-  address admin = 0x0000000000000000000000000000000000000000;
   uint public pwin = 5000; //probability of winning (10000 = 100%)
   uint public edge = 200; //edge percentage (10000 = 100%)
   uint public maxWin = 100; //max win (before edge is taken) as percentage of bankroll (10000 = 100%)
@@ -271,13 +270,10 @@ contract Dice is usingOraclize {
   int public profit = 0;
   int public takenProfit = 0;
 
-  bytes32 public idTest;
-  function Dice(address adminInitial, uint pwinInitial, uint edgeInitial, uint maxWinInitial, uint minBetInitial, uint maxInvestorsInitial) {
+  function Dice(uint pwinInitial, uint edgeInitial, uint maxWinInitial, uint minBetInitial, uint maxInvestorsInitial) {
     oraclize_setNetwork(networkID_testnet);
     bytes32 id = oraclize_query("URL", "https://www.random.org/integers/?num=1&min=0&max=9999&col=1&base=10&format=plain&rnd=new");
     bets[id] = Bet(0x0000000000000000000000000000000000000000, 0);
-    idTest = id;
-    admin = adminInitial;
     pwin = pwinInitial;
     edge = edgeInitial;
     maxWin = maxWinInitial;
@@ -306,17 +302,23 @@ contract Dice is usingOraclize {
   function __callback(bytes32 id, string result) {
     if (msg.sender != oraclize_cbAddress()) throw;
     if (bets[id].bet>0) {
-      uint roll = parseInt(result);
-      if (roll <= pwin) { //win
-        bets[id].user.send(bets[id].bet * (10000 - edge) / pwin);
-        profit += int(bets[id].bet) - int(bets[id].bet * (10000 - edge) / pwin);
-      } else { //lose
-        bets[id].user.send(1); //send 1 wei
-        profit += int(bets[id].bet) - 1;
+      if (bets[id].bet * 10000 / pwin - bets[id].bet <= 2 * maxWin * getBankroll() / 10000) {
+        uint roll = parseInt(result);
+        if (roll <= pwin) { //win
+          bets[id].user.send(bets[id].bet * (10000 - edge) / pwin);
+          profit += int(bets[id].bet) - int(bets[id].bet * (10000 - edge) / pwin);
+        } else { //lose
+          bets[id].user.send(1); //send 1 wei
+          profit += int(bets[id].bet) - 1;
+        }
+        numBets++;
+        amountWagered += bets[id].bet;
+        bets[id].bet = 0;
+      } else {
+        //bet is too big (bankroll may have changed since the bet was made)
+        bets[id].user.send(bets[id].bet);
+        bets[id].bet = 0;
       }
-      numBets++;
-      amountWagered += bets[id].bet;
-      bets[id].bet = 0;
     }
   }
 
@@ -331,8 +333,8 @@ contract Dice is usingOraclize {
       if (numInvestors<maxInvestors) {
         investorID = ++numInvestors;
       } else {
-        for (uint i=1; i<=numInvestors; i++) {
-          if (investors[i].capital<msg.value && investors[i].user!=admin && (investorID==0 || investors[i].capital<investors[investorID].capital)) {
+        for (uint i=2; i<=numInvestors; i++) {
+          if (investors[i].capital<msg.value && (investorID==0 || investors[i].capital<investors[investorID].capital)) {
             investorID = i;
           }
         }
@@ -340,29 +342,37 @@ contract Dice is usingOraclize {
       if (investorID>0) {
         if (investors[investorID].capital>0) {
           divest(investors[investorID].user, investors[investorID].capital);
+          investorIDs[investors[investorID].user] = 0;
         }
-        investorIDs[investors[investorID].user] = 0;
-        investors[investorID].user = msg.sender;
-        investors[investorID].capital = msg.value;
-        invested += msg.value;
-        investorIDs[msg.sender] = investorID;
+        if (investors[investorID].capital == 0 && investorIDs[investors[investorID].user] == 0) {
+          investors[investorID].user = msg.sender;
+          investors[investorID].capital = msg.value;
+          invested += msg.value;
+          investorIDs[msg.sender] = investorID;
+        } else {
+          throw;
+        }
+      } else {
+        throw;
       }
     }
   }
 
   function rebalance() private {
-    uint newInvested = 0;
-    uint initialBankroll = getBankroll();
-    for (uint i=1; i<=numInvestors; i++) {
-      investors[i].capital = getBalance(investors[i].user);
-      newInvested += investors[i].capital;
+    if (takenProfit != profit) {
+      uint newInvested = 0;
+      uint initialBankroll = getBankroll();
+      for (uint i=1; i<=numInvestors; i++) {
+        investors[i].capital = getBalance(investors[i].user);
+        newInvested += investors[i].capital;
+      }
+      invested = newInvested;
+      if (newInvested != initialBankroll && numInvestors>0) {
+        investors[1].capital += (initialBankroll - newInvested); //give the rounding error to the first investor
+        invested += (initialBankroll - newInvested);
+      }
+      takenProfit = profit;
     }
-    invested = newInvested;
-    if (newInvested != initialBankroll && numInvestors>0) {
-      investors[1].capital += (initialBankroll - newInvested); //give the rounding error to the first investor
-      invested += (initialBankroll - newInvested);
-    }
-    takenProfit = profit;
   }
 
   function divest(address user, uint amount) private {
@@ -394,15 +404,22 @@ contract Dice is usingOraclize {
     return uint(int(invested)+profit-takenProfit);
   }
 
-  function getStatus() constant returns(uint, uint, uint, uint, uint, uint, int) {
-    return (getBankroll(), pwin, edge, maxWin, minBet, amountWagered, profit);
+  function getMinInvestment() constant returns(uint) {
+    if (numInvestors<maxInvestors) {
+      return 0;
+    } else {
+      uint investorID = 0;
+      for (uint i=2; i<=numInvestors; i++) {
+        if (investorID==0 || getBalance(investors[i].user)<getBalance(investors[investorID].user)) {
+          investorID = i;
+        }
+      }
+      return getBalance(investors[investorID].user);
+    }
   }
 
-  function changeAdmin(address newAdmin) {
-    if (msg.value>0) throw;
-    if (msg.sender == admin) {
-      admin = newAdmin;
-    }
+  function getStatus() constant returns(uint, uint, uint, uint, uint, uint, int, uint) {
+    return (getBankroll(), pwin, edge, maxWin, minBet, amountWagered, profit, getMinInvestment());
   }
 
 }

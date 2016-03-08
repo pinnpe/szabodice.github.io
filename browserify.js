@@ -1,5 +1,5 @@
 var Web3 = require('web3');
-var utility = require('./utility.js');
+var utility = require('./utility_basic.js');
 var request = require('request');
 var async = (typeof(window) === 'undefined') ? require('async') : require('async/dist/async.min.js');
 
@@ -7,7 +7,7 @@ function Main() {
 }
 //functions
 Main.updateTable = function() {
-  async.map(config.addrs,
+  async.map(config.contract_dice_addrs,
     function(addr, callback) {
       utility.proxyCall(web3, myContract, addr, 'getStatus', [], function(result) {
         var bankroll = result[0].toNumber();
@@ -39,7 +39,7 @@ $(function() {
     var code = compiled.Dice.code;
     var abi = compiled.Dice.info.abiDefinition;
     myContract = web3.eth.contract(abi);
-    myContract = myContract.at(config.addrs[0]);
+    myContract = myContract.at(config.contract_dice_addrs[0]);
     Main.refresh();
   });
 });

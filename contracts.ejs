@@ -10,10 +10,15 @@
         <div class="modal-body">
           <p><strong>Contract address</strong>: <a href="http://<%= config.eth_testnet ? 'testnet.' : ''%>etherscan.io/address/<%= contract.addr%>" target="_blank"><%= contract.addr%></a></a></p>
           <p><strong>Probability of winning</strong>: <%= contract.pwin/100 %>%</p>
-          <p><strong>Payout</strong>: <%= (10000-contract.edge)/contract.pwin %>x (includes <%= contract.edge/100%>% house edge)</p>
+          <p><strong>Payout</strong>: <%= ((10000-contract.edge)/contract.pwin).toFixed(3) %>x (includes <%= contract.edge/100%>% house edge)</p>
           <p><strong>Bankroll</strong>: <%= bundle.utility.weiToEth(contract.bankroll) %> eth</p>
-          <p><strong>Min bet</strong>: <%= bundle.utility.weiToEth(contract.minBet) %> eth</p>
-          <p><strong>Max bet</strong>: <%= bundle.utility.weiToEth(contract.maxWin * contract.bankroll / 10000 / ( 10000/contract.pwin - 1 )) %> eth (corresponds to <%= contract.maxWin/100 %>% of bankroll max profit before house edge is taken)</p>
+          <% if(contract.minBet < contract.maxWin * contract.bankroll / 10000 / ( 10000/contract.pwin - 1 )){ %>
+            <p><strong>Min bet</strong>: <%= bundle.utility.weiToEth(contract.minBet) %> eth</p>
+            <p><strong>Max bet</strong>: <%= bundle.utility.weiToEth(contract.maxWin * contract.bankroll / 10000 / ( 10000/contract.pwin - 1 )) %> eth (corresponds to <%= contract.maxWin/100 %>% of bankroll max profit before house edge is taken)</p>
+          <% } else { %>
+            <p><strong>Min bet</strong>: The bankroll is too small.</p>
+            <p><strong>Max bet</strong>: The bankroll is too small.</p>
+          <% } %>
           <p><strong>Amount wagered</strong>: <%= bundle.utility.weiToEth(contract.amountWagered) %> eth</p>
           <p><strong>House profit</strong>: <%= bundle.utility.weiToEth(contract.profit) %> eth</p>
           <p><strong>Send a bet with Geth:</strong></p>
@@ -43,10 +48,14 @@
         <a href="#" data-toggle="modal" data-target="#<%= contract.addr%>"><%= contract.addr %></a>
       </td>
       <td><%= contract.pwin/100 %>%</td>
-      <td><%= (10000-contract.edge)/contract.pwin %>x</td>
+      <td><%= ((10000-contract.edge)/contract.pwin).toFixed(3) %>x</td>
       <td><%= bundle.utility.weiToEth(contract.bankroll) %></td>
-      <td><%= bundle.utility.weiToEth(contract.minBet) %></td>
-      <td><%= bundle.utility.weiToEth(contract.maxWin * contract.bankroll / 10000 / ( 10000/contract.pwin - 1 )) %></td>
+      <% if(contract.minBet < contract.maxWin * contract.bankroll / 10000 / ( 10000/contract.pwin - 1 )){ %>
+        <td><%= bundle.utility.weiToEth(contract.minBet) %></td>
+        <td><%= bundle.utility.weiToEth(contract.maxWin * contract.bankroll / 10000 / ( 10000/contract.pwin - 1 )) %></td>
+      <% } else { %>
+        <td colspan="2">Bankroll too small</td>
+      <% } %>
       <td><%= bundle.utility.weiToEth(contract.amountWagered) %></td>
       <td><%= bundle.utility.weiToEth(contract.profit) %></td>
     </tr>
