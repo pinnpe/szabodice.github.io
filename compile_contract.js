@@ -13,6 +13,7 @@ var code = compiled.Dice.code;
 var abi = compiled.Dice.info.abiDefinition;
 web3.eth.defaultAccount = config.eth_addr;
 var pwins = [1000, 2000, 5000, 8000, 9000];
+var pwins = [5000];
 
 async.map(pwins,
 	function(pwin, callback_map) {

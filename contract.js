@@ -69,7 +69,7 @@ if (cli_options.help) {
       var investAmount = utility.ethToWei(cli_options.invest);
       console.log('Invest '+(utility.weiToEth(investAmount))+' eth');
       if (cli_options.armed) {
-        utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'invest', [{gas: 1000000, value: investAmount}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
+        utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'invest', [{gas: 200000, value: investAmount}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
           txHash = result[0];
           nonce = result[1];
           console.log(txHash);
@@ -84,7 +84,7 @@ if (cli_options.help) {
       var divestAmount = utility.ethToWei(cli_options.divest);
       console.log('Divest '+(utility.weiToEth(divestAmount))+' eth');
       if (cli_options.armed) {
-          utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'divest', [divestAmount , {gas: 1000000, value: 0}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
+          utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'divest', [divestAmount , {gas: 200000, value: 0}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
           txHash = result[0];
           nonce = result[1];
           console.log(txHash);
@@ -99,7 +99,7 @@ if (cli_options.help) {
       var betAmount = utility.ethToWei(cli_options.bet);
       console.log('Bet '+(utility.weiToEth(betAmount))+' eth');
       if (cli_options.armed) {
-          utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'bet', [{gas: 121000, value: betAmount}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
+          utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'bet', [{gas: 200000, value: betAmount}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
           txHash = result[0];
           nonce = result[1];
           console.log(txHash);
