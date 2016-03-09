@@ -272,7 +272,7 @@ contract Dice is usingOraclize {
   int public takenProfit = 0;
 
   function Dice(uint pwinInitial, uint edgeInitial, uint maxWinInitial, uint minBetInitial, uint maxInvestorsInitial) {
-    oraclize_setNetwork(networkID_testnet);
+    oraclize_setNetwork(networkID_mainnet);
     oraclize_query("URL", "https://www.random.org/integers/?num=1&min=1&max=10000&col=1&base=10&format=plain&rnd=new");
     pwin = pwinInitial;
     edge = edgeInitial;
