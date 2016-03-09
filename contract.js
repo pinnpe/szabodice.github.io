@@ -18,6 +18,7 @@ var cli = commandLineArgs([
   { name: 'invest', type: Number, defaultValue: 0 },
   { name: 'divest', type: Number, defaultValue: 0 },
   { name: 'bet', type: Number, defaultValue: 0 },
+	{ name: 'oraclize', type: Number, defaultValue: 0 },
 ]);
 var cli_options = cli.parse()
 
@@ -44,6 +45,7 @@ if (cli_options.help) {
       var amountWagered = result[5].toNumber();
       var profit = result[6].toNumber();
       var minInvestment = result[7].toNumber();
+			var unresolved = result[8].toNumber();
       utility.proxyCall(web3, myContract, cli_options.contract_dice_addr, 'getBalance', [cli_options.eth_addr], function(result) {
         var balance = result.toNumber();
         console.log('Contract address: ', cli_options.contract_dice_addr);
@@ -55,6 +57,7 @@ if (cli_options.help) {
         console.log('Amount wagered: ', (utility.weiToEth(amountWagered))+' eth');
         console.log('House profit: ', (utility.weiToEth(profit))+' eth');
         console.log('Minimum investment: ', (utility.weiToEth(minInvestment))+' eth');
+				console.log('Unresolved bets: ', (unresolved));
         console.log('');
         console.log('My address: ', cli_options.eth_addr);
         console.log('My balance: ', (utility.weiToEth(balance))+' eth');
@@ -96,7 +99,23 @@ if (cli_options.help) {
       var betAmount = utility.ethToWei(cli_options.bet);
       console.log('Bet '+(utility.weiToEth(betAmount))+' eth');
       if (cli_options.armed) {
-          utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'bet', [{gas: 122000, value: betAmount}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
+          utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'bet', [{gas: 121000, value: betAmount}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
+          txHash = result[0];
+          nonce = result[1];
+          console.log(txHash);
+        });
+      } else {
+        console.log('Run command again with --armed to send the transaction.');
+      }
+    }
+		//oraclize
+    if (cli_options.oraclize>0) {
+      console.log('');
+      var n = cli_options.oraclize;
+			var amount = utility.ethToWei(1);
+      console.log('Call Oraclize '+n+' times');
+      if (cli_options.armed) {
+          utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'callOraclize', [n, {gas: 1000000, value: amount}], cli_options.eth_addr, cli_options.eth_addr_pk, nonce, function(result) {
           txHash = result[0];
           nonce = result[1];
           console.log(txHash);

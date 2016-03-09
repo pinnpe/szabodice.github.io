@@ -1,14 +1,13 @@
 var Web3 = require('web3');
-var utility = require('./config.js');
+var config = require('./config.js');
 var utility = require('./utility.js');
-var request = require('request');
 var async = (typeof(window) === 'undefined') ? require('async') : require('async/dist/async.min.js');
 var commandLineArgs = require('command-line-args');
 require('datejs');
 
 var cli = commandLineArgs([
 	{ name: 'help', alias: 'h', type: Boolean },
-  { name: 'contract_dice_addr', type: String, defaultValue: config.contract_dice_addr },
+  { name: 'contract_dice_addr', type: String, defaultValue: config.contract_dice_addrs[0] },
   { name: 'contract_dice', type: String, defaultValue: config.contract_dice },
   { name: 'eth_provider', type: String, defaultValue: config.eth_provider },
   { name: 'eth_testnet', type: Boolean, defaultValue: config.eth_testnet },
@@ -23,7 +22,8 @@ var cli_options = cli.parse()
 if (cli_options.help) {
 	console.log(cli.getUsage());
 } else {
-  var addrs = [cli_options.eth_addr];
+	//PUT FIVE OR MORE TEST ADDRESSES HERE
+  var addrs = [];
   var web3 = new Web3();
   web3.setProvider(new web3.providers.HttpProvider(cli_options.eth_provider));
   var myContract = undefined;
@@ -53,7 +53,7 @@ if (cli_options.help) {
                 var balance = result.toNumber();
                 var investAmount = utility.ethToWei(200);
                 if (balance<investAmount) {
-                  investAmount = investAmount + utility.ethToWei(Math.random()*100);
+                  // investAmount = investAmount + utility.ethToWei(Math.random()*100);
                   utility.proxySend(web3, myContract, cli_options.contract_dice_addr, 'invest', [{gas: 1000000, value: investAmount-balance}], addr, undefined, nonce, function(result) {
                     txHash = result[0];
                     nonce = result[1];
@@ -79,11 +79,12 @@ if (cli_options.help) {
       function(err, results){
         if (cli_options.bet) console.log("Test bet");
         //bet
-        sizes = [1.0];
-        for (var i=1; i<10; i++) {
-          sizes.push(Math.random()*0.8);
+        var sizes = [];
+        for (var i=0; i<5; i++) {
+          // sizes.push(Math.random()*0.8);
+					sizes.push(1.0);
         }
-        async.series(
+        async.parallel(
           sizes.map(function(size){
             return function(callback){
               if (cli_options.bet) {

@@ -264,7 +264,8 @@ contract Dice is usingOraclize {
     address user;
     uint bet;
   }
-  mapping (bytes32 => Bet) bets;
+  mapping (uint => Bet) bets;
+  uint public nextResolve = 0;
   uint public numBets = 0;
   uint public amountWagered = 0;
   int public profit = 0;
@@ -272,8 +273,7 @@ contract Dice is usingOraclize {
 
   function Dice(uint pwinInitial, uint edgeInitial, uint maxWinInitial, uint minBetInitial, uint maxInvestorsInitial) {
     oraclize_setNetwork(networkID_testnet);
-    bytes32 id = oraclize_query("URL", "https://www.random.org/integers/?num=1&min=0&max=9999&col=1&base=10&format=plain&rnd=new");
-    bets[id] = Bet(0x0000000000000000000000000000000000000000, 0);
+    oraclize_query("URL", "https://www.random.org/integers/?num=1&min=1&max=10000&col=1&base=10&format=plain&rnd=new");
     pwin = pwinInitial;
     edge = edgeInitial;
     maxWin = maxWinInitial;
@@ -289,8 +289,8 @@ contract Dice is usingOraclize {
     if (msg.value * 10000 / pwin - msg.value <= maxWin * getBankroll() / 10000 && msg.value>=minBet) {
       if (oraclize.getPrice("URL") < 1 ether) {
         profit -= int(oraclize.getPrice("URL")); //the house pays the oraclize fee
-        bytes32 id = oraclize_query("URL", "https://www.random.org/integers/?num=1&min=0&max=9999&col=1&base=10&format=plain&rnd=new");
-        bets[id] = Bet(msg.sender, msg.value);
+        oraclize_query("URL", "https://www.random.org/integers/?num=1&min=1&max=10000&col=1&base=10&format=plain&rnd=new");
+        bets[numBets++] = Bet(msg.sender, msg.value);
       } else {
         throw; //the fee is too large
       }
@@ -301,25 +301,37 @@ contract Dice is usingOraclize {
 
   function __callback(bytes32 id, string result) {
     if (msg.sender != oraclize_cbAddress()) throw;
-    if (bets[id].bet>0) {
-      if (bets[id].bet * 10000 / pwin - bets[id].bet <= 2 * maxWin * getBankroll() / 10000) {
+    if (nextResolve<numBets && bets[nextResolve].bet>0) {
+      if (bets[nextResolve].bet * 10000 / pwin - bets[nextResolve].bet <= 2 * maxWin * getBankroll() / 10000) {
         uint roll = parseInt(result);
-        if (roll <= pwin) { //win
-          bets[id].user.send(bets[id].bet * (10000 - edge) / pwin);
-          profit += int(bets[id].bet) - int(bets[id].bet * (10000 - edge) / pwin);
+        if (roll>=1 && roll<=10000) {} else throw;
+        if (roll-1 <= pwin) { //win
+          bets[nextResolve].user.send(bets[nextResolve].bet * (10000 - edge) / pwin);
+          profit += int(bets[nextResolve].bet) - int(bets[nextResolve].bet * (10000 - edge) / pwin);
         } else { //lose
-          bets[id].user.send(1); //send 1 wei
-          profit += int(bets[id].bet) - 1;
+          bets[nextResolve].user.send(1); //send 1 wei
+          profit += int(bets[nextResolve].bet) - 1;
         }
-        numBets++;
-        amountWagered += bets[id].bet;
-        bets[id].bet = 0;
+        amountWagered += bets[nextResolve].bet;
+        bets[nextResolve].bet = 0;
+        nextResolve++;
       } else {
         //bet is too big (bankroll may have changed since the bet was made)
-        bets[id].user.send(bets[id].bet);
-        bets[id].bet = 0;
+        bets[nextResolve].user.send(bets[nextResolve].bet);
+        bets[nextResolve].bet = 0;
+        nextResolve++;
       }
     }
+  }
+
+  function callOraclize(uint n) {
+    uint value = msg.value;
+    uint price = oraclize.getPrice("URL");
+    for (uint i=0; i<n && price < 1 ether && value>price; i++) {
+      oraclize_query("URL", "https://www.random.org/integers/?num=1&min=1&max=10000&col=1&base=10&format=plain&rnd=new");
+      value -= price;
+    }
+    msg.sender.send(value); //return leftover
   }
 
   function invest() {
@@ -392,6 +404,10 @@ contract Dice is usingOraclize {
     divest(msg.sender, amount);
   }
 
+  function divest() {
+    divest(msg.sender, getBalance(msg.sender));
+  }
+
   function getBalance(address user) constant returns(uint) {
     if (investorIDs[user]>0 && invested>0) {
       return investors[investorIDs[user]].capital * getBankroll() / invested;
@@ -418,8 +434,8 @@ contract Dice is usingOraclize {
     }
   }
 
-  function getStatus() constant returns(uint, uint, uint, uint, uint, uint, int, uint) {
-    return (getBankroll(), pwin, edge, maxWin, minBet, amountWagered, profit, getMinInvestment());
+  function getStatus() constant returns(uint, uint, uint, uint, uint, uint, int, uint, uint) {
+    return (getBankroll(), pwin, edge, maxWin, minBet, amountWagered, profit, getMinInvestment(), numBets-nextResolve);
   }
 
 }

@@ -17,7 +17,8 @@ Main.updateTable = function() {
         var minBet = result[4].toNumber();
         var amountWagered = result[5].toNumber();
         var profit = result[6].toNumber();
-        callback(null, {addr: addr, bankroll: bankroll, pwin: pwin, edge: edge, maxWin: maxWin, minBet: minBet, amountWagered: amountWagered, profit: profit});
+        var minInvestment = result[7].toNumber();
+        callback(null, {addr: addr, bankroll: bankroll, pwin: pwin, edge: edge, maxWin: maxWin, minBet: minBet, amountWagered: amountWagered, profit: profit, minInvestment: minInvestment});
       });
     },
     function(err, contracts) {

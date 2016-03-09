@@ -21,7 +21,7 @@ async.map(pwins,
 		var minBet = utility.ethToWei(1);
 		var maxInvestors = 5;
 		var myContract = web3.eth.contract(abi);
-		var contract = myContract.new(pwin, edge, maxWin, minBet, maxInvestors, {data: code, gas: 3141592}, function (err, contract) {
+		var contract = myContract.new(pwin, edge, maxWin, minBet, maxInvestors, {data: code, gas: 3141592, gasPrice: 20000000000}, function (err, contract) {
 			if(err) {
 				console.log(err);
 				callback_map(null, undefined);

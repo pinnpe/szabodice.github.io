@@ -1,6 +1,13 @@
 body{
 	margin: 0;
-	padding: 0;
+	padding: 1em;
+	background: #ccc;
+}
+
+#page {
+	background: #fff;
+	padding: 1em;
+	border-radius: 25px;
 }
 
 .jumbo {
@@ -15,6 +22,8 @@ body{
 
 .rule {
 	border-top: 1px solid #ccc;
+	margin-top: 1em;
+	margin-bottom: 1em;
 }
 
 #header {
